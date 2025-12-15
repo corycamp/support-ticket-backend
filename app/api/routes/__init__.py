@@ -6,9 +6,10 @@ from app.services.user_service import UserService
 
 # Try to wire DB-backed repos (Postgres) if available; otherwise fall back to in-memory
 try:
-    raise Exception("Force in-memory for now")
+    print("Using DB-backed repositories")
     from app.db.engine import init_db
     from app.db.repositories import TicketRepo, CommentRepo, UserRepo
+    print("Initializing database...")
     init_db()
     comment_repo = CommentRepo()
     ticket_repo = TicketRepo()
@@ -18,6 +19,7 @@ try:
     ticket_service = TicketService(comment_service, repo=ticket_repo)
 except Exception:
     # fallback to in-memory services
+    print("Using in-memory repositories")
     comment_service = CommentService()
     user_service = UserService()
     ticket_service = TicketService()

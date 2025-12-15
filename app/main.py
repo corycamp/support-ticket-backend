@@ -9,11 +9,12 @@ app.include_router(tickets_router, prefix="/tickets", tags=["tickets"])
 app.include_router(comments_router, prefix="/comments", tags=["comments"])
 app.include_router(users_router, prefix="/users", tags=["users"])
 
-@app.on_event("startup")
-def startup_event():
-    try:
-        from app.db.engine import init_db
-        init_db()
-    except Exception:
-        # DB not configured or import failed; ignore for in-memory mode
-        pass
+# @app.on_event("startup")
+# def startup_event():
+#     try:
+#         from app.db.engine import init_db
+#         init_db()
+#     except Exception:
+#         # DB not configured or import failed; ignore for in-memory mode
+#         print("Database initialization skipped")
+#         pass

@@ -14,6 +14,9 @@ class TicketRepo:
             session.commit()
             session.refresh(t)
             return {"id": t.id, "title": t.title, "description": t.description, "priority": t.priority, "status": t.status, "created_at": t.created_at}
+        except Exception as e:
+            session.rollback()
+            raise e
         finally:
             session.close()
 
@@ -24,6 +27,8 @@ class TicketRepo:
             if not t:
                 return None
             return {"id": t.id, "title": t.title, "description": t.description, "priority": t.priority, "status": t.status, "created_at": t.created_at}
+        except Exception as e:
+            raise e
         finally:
             session.close()
 
@@ -47,6 +52,9 @@ class CommentRepo:
             session.commit()
             session.refresh(c)
             return {"id": c.id, "ticket_id": c.ticket_id, "user_id": c.user_id, "content": c.content, "created_at": c.created_at}
+        except Exception as e:
+            session.rollback()
+            raise e
         finally:
             session.close()
 
@@ -90,6 +98,9 @@ class UserRepo:
             session.commit()
             session.refresh(user)
             return {"id": user.id, "email": user.email, "role": user.role, "created_at": user.created_at}
+        except Exception as e:
+            session.rollback()
+            raise ValueError(f"Error saving user: {e}")
         finally:
             session.close()
 

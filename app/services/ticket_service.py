@@ -1,17 +1,55 @@
-from typing import Dict
+from typing import Dict, Optional
+from app.core.utils import now_iso
 from app.models.ticket import TicketCreate
+from app.services.comment_service import CommentService
+from threading import Lock
 
-class TicketService:
+class InMemoryRepo:
     def __init__(self):
         self._store: Dict[int, Dict] = {}
         self._next = 1
+        self._lock = Lock()
+
+    def save(self, data: Dict) -> Dict:
+        with self._lock:
+            tid = self._next
+            self._next += 1
+            data = dict(data, id=tid)
+            self._store[tid] = data
+            return data
+
+    def get(self, tid: int) -> Optional[Dict]:
+        return self._store.get(tid)
+
+    def list(self):
+        return list(self._store.values())
+
+class TicketService:
+    def __init__(self, comment_service: CommentService = None, repo: Optional[InMemoryRepo] = None):
+        self.comment_service = comment_service
+        self.repo = repo or InMemoryRepo()
 
     def create_ticket(self, ticket: TicketCreate) -> Dict:
-        tid = self._next
-        self._next += 1
-        data = {"id": tid, "title": ticket.title, "description": ticket.description}
-        self._store[tid] = data
-        return data
+        data = {"title": ticket.title, "description": ticket.description, "created_at": now_iso(), "status": ticket.status, "priority": ticket.priority}
+        return self.repo.save(data)
 
     def get_ticket(self, ticket_id: int):
-        return self._store.get(ticket_id)
+        comments = self.comment_service.list_comments_for_ticket(ticket_id) if self.comment_service else []
+        ticket = self.repo.get(ticket_id)
+        return {**ticket, "comments": comments} if ticket else {}
+    
+    def list_tickets(self):
+        tickets = []
+        for ticket in self.repo.list():
+            comments = self.comment_service.list_comments_for_ticket(ticket.get("id")) if self.comment_service else []
+            tickets.append({**ticket, "comments": comments})
+        return tickets
+
+# FastAPI dependency provider
+_service_singleton: Optional[TicketService] = None
+
+def get_ticket_service() -> TicketService:
+    global _service_singleton
+    if _service_singleton is None:
+        _service_singleton = TicketService()
+    return _service_singleton

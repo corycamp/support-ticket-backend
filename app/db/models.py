@@ -12,7 +12,7 @@ class Ticket(Base):
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String, nullable=False)
     description = Column(Text)
-    priority = Column(SAEnum(Priority), default=Priority.MEDIUM)
+    priority = Column(SAEnum(Priority), default=Priority.LOW)
     status = Column(SAEnum(Status), default=Status.OPEN)
     created_at = Column(DateTime, default=now_iso())
 

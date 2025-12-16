@@ -9,11 +9,15 @@ DB_PORT = os.getenv('DB_PORT')
 DB_NAME = os.getenv('DB_NAME')
 DB_URL = os.getenv('DB_URL')
 
-if not all([DB_USER, DB_PASSWORD, DB_HOST, DB_PORT, DB_NAME]):
-    print("One or more database environment variables are not set")
-    raise RuntimeError("Database environment variables not set properly")
+# Prefer an explicit DATABASE_URL env var; otherwise attempt to build one from individual vars.
+DATABASE_URL = os.getenv('DATABASE_URL')
+if not DATABASE_URL and all([DB_USER, DB_PASSWORD, DB_HOST, DB_PORT, DB_NAME]):
+    DATABASE_URL = f'{DB_URL}{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
 
-DATABASE_URL = os.getenv('DATABASE_URL', f'{DB_URL}{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}')
+# If still not set, fall back to a local SQLite DB so tests and dev environment work without Postgres.
+if not DATABASE_URL:
+    print("One or more database environment variables are not set; falling back to SQLite dev DB")
+    DATABASE_URL = os.getenv('SQLITE_DATABASE_URL', 'sqlite:///./dev.db')
 
 # Use SQLAlchemy sync engine for now; switching to async is straightforward later
 engine = create_engine(DATABASE_URL, future=True)

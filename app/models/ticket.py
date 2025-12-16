@@ -15,5 +15,5 @@ class Status(str, Enum):
 class TicketCreate(BaseModel):
     title: str
     description: str
-    priority: Priority
-    status: Status
+    priority: Priority = Priority.MEDIUM
+    status: Status = Status.OPEN

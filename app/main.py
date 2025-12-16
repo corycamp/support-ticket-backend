@@ -18,9 +18,9 @@ async def lifespan(app: FastAPI):
     user_repo = UserRepo()
 
     # Assign singletons on the service modules so dependencies read the initialized instances
-    ticket_service_mod._ticket_service_singleton = ticket_service_mod.TicketService(repo=ticket_repo, comment_repo=comment_repo)
     user_service_mod._user_service_singleton = user_service_mod.UserService(repo=user_repo)
     comment_service_mod._comment_service_singleton = comment_service_mod.CommentService(repo=comment_repo)
+    ticket_service_mod._ticket_service_singleton = ticket_service_mod.TicketService(repo=ticket_repo, comment_service=comment_service_mod._comment_service_singleton)
     
     yield
     # Shutdown actions

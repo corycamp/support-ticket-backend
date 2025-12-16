@@ -11,12 +11,6 @@ try:
     from app.db.repositories import TicketRepo, CommentRepo, UserRepo
     print("Initializing database...")
     init_db()
-    # comment_repo = CommentRepo()
-    # ticket_repo = TicketRepo()
-    # user_repo = UserRepo()
-    # comment_service = CommentService(repo=comment_repo)
-    # user_service = UserService(repo=user_repo)
-    # ticket_service = TicketService(repo=ticket_repo)
 except Exception:
     # fallback to in-memory services
     print("Using in-memory repositories")

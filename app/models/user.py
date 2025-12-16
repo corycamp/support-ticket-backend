@@ -8,4 +8,4 @@ class Role(str, Enum):
 
 class UserCreate(BaseModel):
     email: str
-    role: Role
+    role: Role = Role.USER

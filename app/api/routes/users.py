@@ -21,4 +21,18 @@ async def get_user(user_email: str, user_service: UserService = Depends(get_user
 @router.get("/")
 async def list_users(user_service: UserService = Depends(get_user_service)):
     return await user_service.list_users()
+
+@router.put("/{user_email}/role", response_model=dict)
+async def update_user_role(user_email: str, new_role: str, user_service: UserService = Depends(get_user_service)):
+    updated_user = await user_service.update_user_role(user_email.lower(), new_role)
+    if not updated_user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return {"user_email": updated_user["email"], "new_role": updated_user["role"]}
+
+@router.delete("/{user_email}")
+async def delete_user(user_email: str, user_service: UserService = Depends(get_user_service)):
+    deleted = await user_service.delete_user(user_email.lower())
+    if not deleted:
+        raise HTTPException(status_code=404, detail="User not found")
+    return {"user_email": deleted["email"], "status": "deleted"}
     

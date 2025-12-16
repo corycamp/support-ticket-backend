@@ -1,7 +1,6 @@
 from typing import Dict, Optional
 from app.core.utils import now_iso
 from app.models.comment import CommentCreate
-from app.services.user_service import UserService
 
 
 class CommentService:
@@ -15,7 +14,7 @@ class CommentService:
     async def create_comment(self, comment: CommentCreate) -> Dict:
         data = {
             "ticket_id": comment.ticket_id,
-            "user_id": comment.user_id,
+            "user_email": comment.user_email,
             "content": comment.content,
             "created_at": now_iso()
         }
@@ -35,3 +34,12 @@ class CommentService:
 
     def list_comments_for_ticket(self, ticket_id: int):
         return self.repo.list_for_ticket(ticket_id) if self.repo else [c for c in self._store.values() if c["ticket_id"] == ticket_id]
+    
+    
+# FastAPI dependency provider
+_comment_service_singleton: Optional[CommentService] = None
+def get_comment_service() -> CommentService:
+    global _comment_service_singleton
+    if _comment_service_singleton is None:
+        _comment_service_singleton = CommentService()
+    return _comment_service_singleton

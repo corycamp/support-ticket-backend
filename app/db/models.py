@@ -20,7 +20,7 @@ class Comment(Base):
     __tablename__ = "comments"
     id = Column(Integer, primary_key=True, index=True)
     ticket_id = Column(Integer, nullable=False, index=True)
-    user_id = Column(Integer, nullable=False)
+    user_email = Column(String, nullable=False)
     content = Column(Text, nullable=False)
     created_at = Column(DateTime, default=now_iso())
 

@@ -51,7 +51,7 @@ class CommentRepo:
             session.add(c)
             session.commit()
             session.refresh(c)
-            return {"id": c.id, "ticket_id": c.ticket_id, "user_id": c.user_id, "content": c.content, "created_at": c.created_at}
+            return {"id": c.id, "ticket_id": c.ticket_id, "user_emai": c.user_email, "content": c.content, "created_at": c.created_at}
         except Exception as e:
             session.rollback()
             raise e
@@ -64,7 +64,7 @@ class CommentRepo:
             c = session.query(Comment).get(cid)
             if not c:
                 return None
-            return {"id": c.id, "ticket_id": c.ticket_id, "user_id": c.user_id, "content": c.content, "created_at": c.created_at}
+            return {"id": c.id, "ticket_id": c.ticket_id, "user_email": c.user_email, "content": c.content, "created_at": c.created_at}
         finally:
             session.close()
 
@@ -72,7 +72,7 @@ class CommentRepo:
         session = self.session_factory()
         try:
             rows = session.query(Comment).filter(Comment.ticket_id == ticket_id).all()
-            return [{"id": r.id, "ticket_id": r.ticket_id, "user_id": r.user_id, "content": r.content, "created_at": r.created_at} for r in rows]
+            return [{"id": r.id, "ticket_id": r.ticket_id, "user_email": r.user_email, "content": r.content, "created_at": r.created_at} for r in rows]
         finally:
             session.close()
 
@@ -80,7 +80,7 @@ class CommentRepo:
         session = self.session_factory()
         try:
             rows = session.query(Comment).all()
-            return [{"id": r.id, "ticket_id": r.ticket_id, "user_id": r.user_id, "content": r.content, "created_at": r.created_at} for r in rows]
+            return [{"id": r.id, "ticket_id": r.ticket_id, "user_email": r.user_email, "content": r.content, "created_at": r.created_at} for r in rows]
         finally:
             session.close()
 

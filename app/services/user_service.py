@@ -4,7 +4,6 @@ from app.models.user import UserCreate
 
 class UserService:
     def __init__(self, repo: Optional[object] = None):
-        # repo should implement save/get/get_by_email/list
         self.repo = repo
         if self.repo is None:
             self._store: Dict[str, Dict] = {}
@@ -26,3 +25,11 @@ class UserService:
             return self.repo.list()
         return list(self._store.values())
     
+
+# FastAPI dependency provider
+_user_service_singleton: Optional[UserService] = None
+def get_user_service() -> UserService:
+    global _user_service_singleton
+    if _user_service_singleton is None:
+        _user_service_singleton = UserService()
+    return _user_service_singleton

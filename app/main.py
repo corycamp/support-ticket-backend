@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from app.api.routes.tickets import router as tickets_router
 from app.api.routes.comments import router as comments_router
 from app.api.routes.users import router as users_router
+from app.api.routes.auth import router as auth_router
 from app.db.engine import init_db
 from app.db import engine as db
 from app.db.repositories import CommentRepo, TicketRepo, UserRepo
@@ -40,3 +41,4 @@ app = FastAPI(title="Support Ticket Backend", lifespan=lifespan)
 app.include_router(tickets_router, prefix="/tickets", tags=["tickets"])
 app.include_router(comments_router, prefix="/comments", tags=["comments"])
 app.include_router(users_router, prefix="/users", tags=["users"])
+app.include_router(auth_router, prefix="/auth", tags=["auth"])

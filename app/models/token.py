@@ -9,3 +9,8 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 30
 class Token(BaseModel):
     access_token: str
     token_type: str
+
+
+class UserLogin(BaseModel):
+    username: str
+    password: str

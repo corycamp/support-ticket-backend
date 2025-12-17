@@ -18,12 +18,16 @@ if not DATABASE_URL and all([DB_USER, DB_PASSWORD, DB_HOST, DB_PORT, DB_NAME]):
     DATABASE_URL = f'{DB_URL}{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}'
 
 # If still not set, fall back to a local SQLite DB so tests and dev environment work without Postgres.
-if not DATABASE_URL:
-    print("One or more database environment variables are not set; falling back to SQLite dev DB")
-    DATABASE_URL = os.getenv('SQLITE_DATABASE_URL', 'sqlite:///./dev.db')
+# if not DATABASE_URL:
+#     print("One or more database environment variables are not set; falling back to SQLite dev DB")
+#     DATABASE_URL = os.getenv('SQLITE_DATABASE_URL', 'sqlite:///./dev.db')
 
 def init_db():
-    print("Creating database tables...")
+    print("Setting up database...")
+
+    if not DATABASE_URL:
+        print("Database URL not set; skipping database initialization.")
+        raise ValueError("Database URL not set")
 
     global engine, SessionLocal
     engine = create_engine(DATABASE_URL, future=True)

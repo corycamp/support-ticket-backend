@@ -1,11 +1,14 @@
 from fastapi import APIRouter, HTTPException, Depends
+from app.api.routes.auth import decode_access_token
 from app.models.ticket import TicketCreate
 from app.services.ticket_service import get_ticket_service, TicketService
 
 router = APIRouter()
 
 @router.post("/", response_model=dict)
-async def create_ticket(ticket: TicketCreate, service: TicketService = Depends(get_ticket_service)):
+async def create_ticket(ticket: TicketCreate, service: TicketService = Depends(get_ticket_service), user=Depends(decode_access_token)):
+    if not user['role'] == 'admin':
+        raise HTTPException(status_code=403, detail="You do not have permission to create tickets")
     saved = service.create_ticket(ticket)
     return {"id": saved["id"], "status": "created"}
 

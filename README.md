@@ -30,7 +30,9 @@ python -m pip install -r requirements.txt
 - `SECRET_KEY` — required for signing access tokens
 - Optional: `DATABASE_URL` — if omitted the app falls back to a local SQLite DB for development/tests
 
-You can create a `.env` file and use `python -m uvicorn app.main:app --reload --env-file .env`.
+**For CI:** add `POSTGRES_PASSWORD` and `SECRET_KEY` as **Repository Secrets** (on GitHub: Settings → Secrets), and do **not** commit credentials or `.env` files to the repository.
+
+You can create a `.env` file for local development and use `python -m uvicorn app.main:app --reload --env-file .env`.
 
 4. Run the server:
 

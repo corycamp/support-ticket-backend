@@ -11,6 +11,7 @@ services:
     environment:
       - SECRET_KEY=${SECRET_KEY:-changeme}
       - DATABASE_URL=${DATABASE_URL:-}
+      - PYTHONPATH=/app
     depends_on:
       - db
 
@@ -24,6 +25,19 @@ services:
       - "5432:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
+
+  test:
+    build: .
+    working_dir: /app
+    volumes:
+      - .:/app
+    environment:
+      - PYTHONPATH=/app
+      - SECRET_KEY=${SECRET_KEY:-changeme}
+      - DATABASE_URL=${DATABASE_URL:-}
+    depends_on:
+      - db
+    command: pytest --maxfail=1 --disable-warnings -q
 
 volumes:
   db_data:

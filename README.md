@@ -1,124 +1,199 @@
 # Support Ticket Backend (scaffold)
 
-This folder contains a minimal FastAPI backend scaffold with:
-- API routes under `app/api/routes`
-- Service layer under `app/services`
-- Pydantic models under `app/models`
-- Core utilities under `app/core`
-- Tests under `tests/unit` and `tests/integration`
-- `Dockerfile`, GitHub Actions workflow, and Terraform scaffold
+A minimal FastAPI backend scaffold for managing support tickets.  
+Includes API routes, service layers, authentication, and database support (SQLite for development/tests or Postgres for production).
 
-## 🚀 Quick start (local)
+This scaffold is intended for **local development**, **testing**, and **CI/CD workflows**.
 
-1. Create and activate a virtualenv (recommended):
+---
+
+## 📂 Project Structure
+
+- `app/api/routes` — API routes (FastAPI endpoints)  
+- `app/services` — Business logic / service layer  
+- `app/models` — Pydantic models for request/response validation  
+- `app/core` — Utilities, constants, and shared logic  
+- `tests/unit` — Unit tests (no DB dependency)  
+- `tests/integration` — Integration tests (can use SQLite or Postgres)  
+- `Dockerfile` — Container definition for the app  
+- `docker-compose.yml` — Compose setup for dev and test services  
+- `Makefile` — Convenience commands for common tasks  
+
+---
+
+## 🔧 Environment Variables
+
+| Variable            | Required | Default  | Description |
+|--------------------|----------|---------|-------------|
+| SECRET_KEY          | Yes      | -       | JWT signing secret |
+| DATABASE_URL        | No       | SQLite fallback | Database URL (Postgres or SQLite) |
+| POSTGRES_USER       | No       | postgres | Postgres DB user (Docker only) |
+| POSTGRES_PASSWORD   | No       | postgres | Postgres password (Docker only) |
+| POSTGRES_DB         | No       | support_db | Postgres database name (Docker only) |
+
+> For CI/CD, add `SECRET_KEY` and `POSTGRES_PASSWORD` as **Repository Secrets** on GitHub.  
+> Do **not** commit credentials or `.env` files.
+
+You can use a local `.env` file for development:
+
+```env
+SECRET_KEY=changeme
+DATABASE_URL=sqlite:///dev.db
+```
+
+And run the server with:
+
+```bash
+python -m uvicorn app.main:app --reload --env-file .env
+```
+
+---
+
+## 🚀 Quick Start (Local)
+
+1. **Create and activate a virtual environment (recommended)**
 
 ```bash
 python -m venv .venv
-.venv\\Scripts\\activate   # Windows
-source .venv/bin/activate  # macOS / Linux
+# Windows
+.venv\Scripts\activate
+# macOS / Linux
+source .venv/bin/activate
 ```
 
-2. Install dependencies:
+2. **Install dependencies**
 
 ```bash
 python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
 ```
 
-3. Set required environment variables (at minimum):
-
-- `SECRET_KEY` — required for signing access tokens
-- Optional: `DATABASE_URL` — if omitted the app falls back to a local SQLite DB for development/tests
-
-**For CI:** add `POSTGRES_PASSWORD` and `SECRET_KEY` as **Repository Secrets** (on GitHub: Settings → Secrets), and do **not** commit credentials or `.env` files to the repository.
-
-You can create a `.env` file for local development and use `python -m uvicorn app.main:app --reload --env-file .env`.
-
-4. Run the server:
+3. **Run the server**
 
 ```bash
 uvicorn app.main:app --reload
 ```
 
-Open the interactive API docs at: http://localhost:8000/docs
+Open API docs: [http://localhost:8000/docs](http://localhost:8000/docs)
 
 ---
 
 ## 🐳 Docker
 
-Build the image:
+### Build the Docker image
 
 ```bash
 docker build -t support-ticket-backend:test .
 ```
 
-Run the container (exposes port 8000):
+### Run the app container (SQLite fallback if DATABASE_URL is not set)
 
 ```bash
 docker run --rm -p 8000:8000 support-ticket-backend:test
 ```
 
-- The app will use SQLite when `DATABASE_URL` is not provided.
-- Verify the API docs: http://localhost:8000/docs
+Open API docs: [http://localhost:8000/docs](http://localhost:8000/docs)
 
-You can also run tests inside the image:
+---
+
+### Docker Compose (Recommended for Dev + Postgres)
 
 ```bash
-docker run --rm support-ticket-backend:test pytest -q
+# Build and start dev app + DB
+docker compose up --build app db
+
+# Run tests in isolated container
+docker compose up --build test
 ```
 
-### Convenience (Makefile)
+> The `test` service automatically sets `PYTHONPATH=/app` to prevent import errors.
 
-A `Makefile` is provided for convenience. Use these targets to speed up common tasks:
+---
 
-- `make build` — build the Docker image
-- `make up` — start services via `docker-compose` (includes optional Postgres)
-- `make down` — stop services
-- `make run` — run the built image locally
-- `make test` — run the test suite locally
-- `make docker-test` — run tests inside the image
-- `make shell` — open a shell inside a temporary container
+## 📜 Makefile Convenience Commands
+
+| Command            | Description |
+|-------------------|-------------|
+| `make build`       | Build the Docker image |
+| `make up`          | Start dev app + Postgres via Docker Compose |
+| `make down`        | Stop services |
+| `make run`         | Run the built image locally |
+| `make test`        | Run tests locally (Python or Docker Compose) |
+| `make docker-test` | Run tests inside Docker image |
+| `make shell`       | Open a shell inside a temporary container |
 
 Example:
 
 ```bash
 make build
 make up
-# visit http://localhost:8000/docs
+# Visit API docs at http://localhost:8000/docs
 ```
 
 ---
 
 ## 🔐 Authentication
 
-- Token endpoint: `POST /auth/token` (uses test credentials included in `app/api/routes/auth.py` for demo purposes)
-  - Demo logins: `admin123` (role: admin), `user123` (role: user). Password is `test123` for both (hashed in code).
-- Use the returned bearer token with `Authorization: Bearer <token>` for protected endpoints.
+- **Token endpoint:** `POST /auth/token`  
+- Demo credentials (for development only):
 
-> Note: This demo auth is intentionally simplistic and intended for development and tests only.
+| Username  | Role  | Password |
+|-----------|-------|----------|
+| admin123  | admin | test123  |
+| user123   | user  | test123  |
+
+Use returned bearer token in requests:
+
+```http
+Authorization: Bearer <token>
+```
+
+> Note: This demo auth is simplistic and intended for testing only.
 
 ---
 
 ## 🧪 Tests
 
-Run unit and integration tests locally:
+### Run tests locally
 
 ```bash
 python -m pytest tests -q
 ```
 
-Integration tests use the application's DB init routine and will run against the SQLite fallback by default. To run tests against a Postgres DB, set `DATABASE_URL` to point at your test Postgres instance.
+- Unit tests run independently of the database.  
+- Integration tests will default to SQLite if `DATABASE_URL` is not set.  
+- To run integration tests against Postgres, set `DATABASE_URL` to the Postgres instance.
+
+### Run tests inside Docker
+
+```bash
+docker compose up --build test
+```
+
+- The container automatically sets `PYTHONPATH=/app`.  
+- Exits with code `0` if tests pass.
 
 ---
 
-## ⚙️ Implementation notes
+## ⚙️ Implementation Notes
 
-- Uses FastAPI + Pydantic for API and validation.
-- Uses SQLAlchemy for optional DB persistence; repository and service layers are implemented so the app can run with either in-memory stores (for unit tests) or DB-backed repos (for integration/production).
-- `created_at` timestamps are timezone-aware (UTC) datetimes.
+- **FastAPI + Pydantic** for API and validation.  
+- **SQLAlchemy** optional DB persistence (SQLite for dev/tests, Postgres for production).  
+- Repository and service layers abstract DB logic for in-memory or DB-backed storage.  
+- Timestamps (`created_at`) are timezone-aware UTC datetimes.
 
 ---
 
-## Contributing
+## 🔄 CI/CD
 
-Contributions welcome — open an issue or a PR with a clear description and tests.
+- GitHub Actions workflow builds Docker image, starts Postgres, and runs tests inside the container.  
+- Mirrors local testing environment for reliable CI.
+
+---
+
+## 🤝 Contributing
+
+Contributions welcome! Open an issue or PR with a clear description and tests.
+
+---
+

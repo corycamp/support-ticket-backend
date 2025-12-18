@@ -1,9 +1,10 @@
 from fastapi import APIRouter, HTTPException
 from fastapi.params import Depends
+from app.api.routes.auth import decode_access_token
 from app.models.comment import CommentCreate
 from app.services.comment_service import CommentService, get_comment_service
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(decode_access_token)])
 
 @router.post("/", response_model=dict)
 async def create_comment(comment: CommentCreate, comment_service: CommentService = Depends(get_comment_service)):

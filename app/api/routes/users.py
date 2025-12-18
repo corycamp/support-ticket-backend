@@ -1,10 +1,10 @@
 from fastapi import APIRouter, HTTPException
 from fastapi.params import Depends
+from app.api.routes.auth import decode_access_token, required_role
 from app.models.user import UserCreate
 from app.services.user_service import UserService, get_user_service
 
-router = APIRouter()
-
+router = APIRouter(dependencies=[Depends(decode_access_token)])
 
 @router.post("/", response_model=dict)
 async def create_user(user: UserCreate, user_service: UserService = Depends(get_user_service)):
@@ -22,14 +22,14 @@ async def get_user(user_email: str, user_service: UserService = Depends(get_user
 async def list_users(user_service: UserService = Depends(get_user_service)):
     return await user_service.list_users()
 
-@router.put("/{user_email}/role", response_model=dict)
+@router.put("/{user_email}/role", response_model=dict,dependencies=[Depends(required_role("admin"))])
 async def update_user_role(user_email: str, new_role: str, user_service: UserService = Depends(get_user_service)):
     updated_user = await user_service.update_user_role(user_email.lower(), new_role)
     if not updated_user:
         raise HTTPException(status_code=404, detail="User not found")
     return {"user_email": updated_user["email"], "new_role": updated_user["role"]}
 
-@router.delete("/{user_email}")
+@router.delete("/{user_email}",dependencies=[Depends(required_role("admin"))])
 async def delete_user(user_email: str, user_service: UserService = Depends(get_user_service)):
     deleted = await user_service.delete_user(user_email.lower())
     if not deleted:

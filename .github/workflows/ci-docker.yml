@@ -21,7 +21,7 @@ jobs:
 
       - name: Build and start services
         run: |
-          docker-compose -f docker-compose.yml -f docker-compose.ci.yml up -d --build
+          docker compose -f docker-compose.yml -f docker-compose.ci.yml up -d --build
 
       - name: Wait for app to be ready
         run: |
@@ -37,9 +37,9 @@ jobs:
 
       - name: Run pytest inside app container
         run: |
-          docker-compose -f docker-compose.yml -f docker-compose.ci.yml exec -T app pytest -q
+          docker compose -f docker-compose.yml -f docker-compose.ci.yml exec -T app pytest -q
 
       - name: Tear down
         if: always()
         run: |
-          docker-compose -f docker-compose.yml -f docker-compose.ci.yml down --volumes --remove-orphans
+          docker compose -f docker-compose.yml -f docker-compose.ci.yml down --volumes --remove-orphans

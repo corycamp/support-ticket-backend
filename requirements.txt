@@ -5,4 +5,8 @@ pytest
 httpx
 SQLAlchemy
 psycopg-binary
+python-jose[cryptography]
+pwdlib
+argon2-cffi
+python-dotenv
 python-jose
